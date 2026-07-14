@@ -22,7 +22,7 @@ public class MessageController {
     @GetMapping("/conversation/{conversationId}")
     public ResponseEntity<List<MessageResponse>> getConversationMessages(
             @PathVariable UUID conversationId,
-            Authentication authentication) {
+            Authentication authentication) throws ResourceNotFoundException {
 
         return ResponseEntity.ok(
                 messageService.getConversationMessages(

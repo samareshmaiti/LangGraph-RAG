@@ -3,6 +3,7 @@ package com.chatbot.ai.state;
 import org.bsc.langgraph4j.prebuilt.MessagesState;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -20,6 +21,12 @@ public class ChatState extends MessagesState<String> {
     public static final String TOTAL_TOKENS = "totalTokens";
     public static final String SUCCESS = "success";
     public static final String ERROR = "error";
+    public static final String CHAT_HISTORY = "chatHistory";
+    public static final String RETRIEVED_CONTEXT = "retrievedContext";
+    public static final String TOOL_RESULTS = "toolResults";
+    public static final String CURRENT_AGENT = "currentAgent";
+    private List<String> retrievedContext;
+
 
     /**
      * Required by LangGraph4j
@@ -29,11 +36,27 @@ public class ChatState extends MessagesState<String> {
     }
 
     /**
-     * Used by LangGraph
+     * Used while creating state
      */
     public ChatState(Map<String, Object> initData) {
         super(initData);
     }
+
+    // ----------------------------------------------------
+    // Generic Methods
+    // ----------------------------------------------------
+
+    public void put(String key, Object value) {
+        data().put(key, value);
+    }
+
+    public void putAll(Map<String, Object> values) {
+        data().putAll(values);
+    }
+
+    // ----------------------------------------------------
+    // Getters
+    // ----------------------------------------------------
 
     public UUID getConversationId() {
         return value(CONVERSATION_ID)
@@ -105,5 +128,105 @@ public class ChatState extends MessagesState<String> {
         return value(ERROR)
                 .map(String.class::cast)
                 .orElse(null);
+    }
+
+    // ----------------------------------------------------
+    // Setters
+    // ----------------------------------------------------
+
+    public void setConversationId(UUID conversationId) {
+        put(CONVERSATION_ID, conversationId);
+    }
+
+    public void setUsername(String username) {
+        put(USERNAME, username);
+    }
+
+    public void setUserMessage(String userMessage) {
+        put(USER_MESSAGE, userMessage);
+    }
+
+    public void setConversationContext(String context) {
+        put(CONVERSATION_CONTEXT, context);
+    }
+
+    public void setPrompt(String prompt) {
+        put(PROMPT, prompt);
+    }
+
+    public void setAssistantMessage(String assistantMessage) {
+        put(ASSISTANT_MESSAGE, assistantMessage);
+    }
+
+    public void setModel(String model) {
+        put(MODEL, model);
+    }
+
+    public void setPromptTokens(Integer promptTokens) {
+        put(PROMPT_TOKENS, promptTokens);
+    }
+
+    public void setCompletionTokens(Integer completionTokens) {
+        put(COMPLETION_TOKENS, completionTokens);
+    }
+
+    public void setTotalTokens(Integer totalTokens) {
+        put(TOTAL_TOKENS, totalTokens);
+    }
+
+    public void setSuccess(Boolean success) {
+        put(SUCCESS, success);
+    }
+
+    public void setError(String error) {
+        put(ERROR, error);
+    }
+    @SuppressWarnings("unchecked")
+    public List<String> getChatHistory() {
+
+        return value(CHAT_HISTORY)
+                .map(v -> (List<String>) v)
+                .orElse(List.of());
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public List<String> getRetrievedContext() {
+
+        return value(RETRIEVED_CONTEXT)
+                .map(v -> (List<String>) v)
+                .orElse(List.of());
+    }
+
+
+    public String getCurrentAgent() {
+
+        return value(CURRENT_AGENT)
+                .map(String.class::cast)
+                .orElse("GENERAL");
+    }
+    @SuppressWarnings("unchecked")
+    public List<String> getToolResults() {
+
+        return value(TOOL_RESULTS)
+                .map(v -> (List<String>) v)
+                .orElse(List.of());
+    }
+    public void setChatHistory(List<String> history) {
+        put(CHAT_HISTORY, history);
+    }
+
+
+    public void setRetrievedContext(List<String> context) {
+        put(RETRIEVED_CONTEXT, context);
+    }
+
+
+    public void setCurrentAgent(String agent) {
+        put(CURRENT_AGENT, agent);
+    }
+    public void setToolResults(List<String> results) {
+
+        put(TOOL_RESULTS, results);
     }
 }

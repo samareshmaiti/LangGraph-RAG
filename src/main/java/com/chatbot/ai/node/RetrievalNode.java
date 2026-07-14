@@ -1,30 +1,30 @@
 package com.chatbot.ai.node;
 
+
 import com.chatbot.ai.state.ChatState;
-import com.chatbot.ai.state.PromptTemplate;
+import com.chatbot.service.rag.RetrievalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.langgraph4j.action.NodeAction;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class PromptNode implements NodeAction<ChatState> {
+public class RetrievalNode implements NodeAction<ChatState> {
 
-    private final PromptTemplate promptTemplate;
+    private final RetrievalService retrievalService;
 
     @Override
     public Map<String, Object> apply(ChatState state) {
+        log.info("Executing Retrieval Node...");
+        List<String> context = retrievalService.retrieve(state.getUserMessage());
 
-        log.info("Building prompt...");
-
-        String prompt = promptTemplate.build(state);
-        log.debug("Prompt length: {} characters", prompt.length());
         return Map.of(
-                ChatState.PROMPT, prompt,
+                ChatState.RETRIEVED_CONTEXT, context,
                 ChatState.SUCCESS, true
         );
     }

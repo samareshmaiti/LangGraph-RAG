@@ -73,8 +73,9 @@ public class JwtUtils {
     public boolean validateJwtToken(String token, UserDetails userDetails) {
         try{
             String email=extractEmail(token);
+            String username=extractUsername(token);
             logger.info("Validating token for email: " + email);
-            return email.equals(userDetails.getUsername()) && !extractClaims(token).getExpiration().before(new Date());
+            return username.equals(userDetails.getUsername()) && !extractClaims(token).getExpiration().before(new Date());
         }catch(SignatureException se){
             logger.warning("Invalid signature :- "+se.getMessage());
         }catch (MalformedJwtException me){

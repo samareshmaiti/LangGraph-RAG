@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface ConversationService {
 
-    ConversationResponse createConversation(CreateConversationRequest request, String username);
+//ConversationResponse createConversation(CreateConversationRequest request, String username);
 
     ConversationResponse getConversation(UUID conversationId, String username) throws ResourceNotFoundException;
 
@@ -20,4 +20,5 @@ public interface ConversationService {
     ConversationResponse updateConversation(UUID conversationId, CreateConversationRequest request, String username);
 
     void deleteConversation(UUID conversationId, String username);
+    UUID createConversation(CreateConversationRequest request, String username);
 }

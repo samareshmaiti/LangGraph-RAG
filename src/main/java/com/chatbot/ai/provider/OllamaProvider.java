@@ -1,5 +1,6 @@
 package com.chatbot.ai.provider;
 
+import com.chatbot.ai.provider.AiProvider;
 import com.chatbot.ai.state.ChatState;
 import dev.langchain4j.model.chat.ChatModel;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +17,22 @@ public class OllamaProvider implements AiProvider {
     @Override
     public String generate(ChatState state) {
 
-        log.info("Calling Ollama...");
+        log.info("========== AI REQUEST START ==========");
+        try {
 
-        return chatModel.chat(state.getPrompt());
+            log.info("Prompt size: {}", state.getPrompt().length());
+            long start = System.currentTimeMillis();
+            String response = chatModel.chat(state.getPrompt());
+            long time = System.currentTimeMillis() - start;
+
+            log.info("AI RESPONSE RECEIVED in {} ms", time);
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("AI REQUEST FAILED", e);
+
+            throw e;
+        }
     }
 }

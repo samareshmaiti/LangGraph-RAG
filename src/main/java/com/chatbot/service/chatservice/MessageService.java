@@ -13,16 +13,16 @@ public interface MessageService {
     /**
      * Save a USER message.
      */
-    MessageResponse saveUserMessage(MessageRequest request, String username);
+    MessageResponse saveUserMessage(MessageRequest request, String username) throws ResourceNotFoundException;
     /**
      * Save an ASSISTANT message.
      */
-    MessageResponse saveAssistantMessage(UUID conversationId, String content, Integer promptTokens, Integer completionTokens, Integer totalTokens, String username);
+    MessageResponse saveAssistantMessage(UUID conversationId, String content, Integer promptTokens, Integer completionTokens, Integer totalTokens, String username) throws ResourceNotFoundException;
 
     /**
      * Get conversation history.
      */
-    List<MessageResponse> getConversationMessages(UUID conversationId, String username);
+    List<MessageResponse> getConversationMessages(UUID conversationId, String username) throws ResourceNotFoundException;
 
     /**
      * Delete a message.

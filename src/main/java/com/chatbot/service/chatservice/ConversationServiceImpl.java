@@ -28,23 +28,18 @@ public class ConversationServiceImpl implements ConversationService {
     private final ConversationMapper conversationMapper;
 
     @Override
-    public ConversationResponse createConversation(CreateConversationRequest request,
-                                                   String username) {
+    public UUID createConversation(CreateConversationRequest request, String username) {
 
-        log.info("Creating conversation for user {}", username);
+        Conversations conversation =
+                Conversations.builder()
+                        .username(username)
+                        .title(request.getTitle())
+                        .active(true)
+                        .build();
 
-        Conversations conversation = Conversations.builder()
-                .title(request.getTitle())
-                .username(username)
-                .active(true)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-
-        Conversations savedConversation =
-                conversationRepository.save(conversation);
-
-        return conversationMapper.toResponse(savedConversation);
+        return conversationRepository
+                .save(conversation)
+                .getId();
     }
 
     @Override

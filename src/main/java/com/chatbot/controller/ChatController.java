@@ -1,6 +1,7 @@
 package com.chatbot.controller;
 
 
+import com.chatbot.exception.ResourceNotFoundException;
 import com.chatbot.model.chatbot.ChatRequest;
 import com.chatbot.model.chatbot.ChatResponse;
 import com.chatbot.service.chatservice.ChatService;
@@ -20,7 +21,7 @@ public class ChatController {
     @PostMapping
     public ResponseEntity<ChatResponse> chat(
             @Valid @RequestBody ChatRequest request,
-            Authentication authentication) {
+            Authentication authentication) throws ResourceNotFoundException {
 
         ChatResponse response = chatService.chat(
                 request,

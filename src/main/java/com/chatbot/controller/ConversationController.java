@@ -23,11 +23,11 @@ public class ConversationController {
     private final ConversationService conversationService;
 
     @PostMapping
-    public ResponseEntity<ConversationResponse> createConversation(
+    public ResponseEntity<UUID> createConversation(
             @Valid @RequestBody CreateConversationRequest request,
             Authentication authentication) {
 
-        ConversationResponse response = conversationService.createConversation(
+        UUID response = conversationService.createConversation(
                 request,
                 authentication.getName());
 
