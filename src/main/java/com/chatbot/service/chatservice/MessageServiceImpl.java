@@ -60,16 +60,8 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MessageResponse> getConversationMessages(UUID conversationId,
-                                                         String username) throws ResourceNotFoundException {
-
-
-        getConversation(
-                conversationId,
-                username
-        );
-
-
+    public List<MessageResponse> getConversationMessages(UUID conversationId, String username) throws ResourceNotFoundException {
+        getConversation(conversationId, username);
         return messageRepository
                 .findByConversationIdOrderByCreatedAtAsc(conversationId)
                 .stream()
@@ -79,87 +71,53 @@ public class MessageServiceImpl implements MessageService {
 
 
     @Override
-    public void deleteMessage(UUID messageId,
-                              String username) throws ResourceNotFoundException {
-
-
-        Message message =
-                messageRepository
+    public void deleteMessage(UUID messageId, String username) throws ResourceNotFoundException {
+        Message message = messageRepository
                         .findById(messageId)
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Message not found",
-                                        HttpStatus.NOT_FOUND.toString()
-                                )
-                        );
+                        .orElseThrow(() -> new ResourceNotFoundException("Message not found", HttpStatus.NOT_FOUND.toString()));
 
-
-        if (!message.getConversation()
-                .getUsername()
-                .equals(username)) {
-
-            throw new ResourceNotFoundException(
-                    "Message not found",
-                    HttpStatus.NOT_FOUND.toString()
-            );
+        if (!message.getConversation().getUsername().equals(username)) {
+            throw new ResourceNotFoundException("Message not found", HttpStatus.NOT_FOUND.toString());
         }
-
-
         messageRepository.delete(message);
-
-
-        log.info(
-                "Message deleted. messageId={}",
-                messageId
-        );
+        log.info("Message deleted. messageId={}", messageId);
     }
-    private Conversations getConversation(UUID conversationId,
-                                          String username) throws ResourceNotFoundException {
+    private Conversations getConversation(UUID conversationId, String username) throws ResourceNotFoundException {
 
         if (conversationId == null) {
-            throw new ResourceNotFoundException(
-                    "Conversation id cannot be null",
-                    HttpStatus.BAD_REQUEST.toString()
-            );
+            throw new ResourceNotFoundException("Conversation id cannot be null", HttpStatus.BAD_REQUEST.toString());
         }
-
-
-        log.info(
-                "Fetching conversation. conversationId={}, username={}",
-                conversationId,
-                username
-        );
-
-
-        Conversations conversation =
-                conversationRepository
-                        .findByIdAndUsername(
-                                conversationId,
-                                username
-                        )
+        log.info("Fetching conversation. conversationId={}, username={}", conversationId, username);
+        Conversations conversation = conversationRepository
+                        .findByIdAndUsername(conversationId, username)
                         .orElseThrow(() -> {
-
-                            log.error(
-                                    "Conversation not found. conversationId={}, username={}",
-                                    conversationId,
-                                    username
-                            );
-
-                            return new ResourceNotFoundException(
-                                    "Conversation not found",
-                                    HttpStatus.NOT_FOUND.toString()
-                            );
+                            log.error("Conversation not found. conversationId={}, username={}", conversationId, username);
+                            return new ResourceNotFoundException("Conversation not found", HttpStatus.NOT_FOUND.toString());
                         });
-
-
-        log.info(
-                "Conversation found. id={}, title={}",
-                conversation.getId(),
-                conversation.getTitle()
-        );
-
-
+        log.info("Conversation found. id={}, title={}", conversation.getId(), conversation.getTitle());
         return conversation;
+    }
+    @Transactional(readOnly = true)
+    @Override
+    public List<String> getConversationHistory(UUID conversationId, String username)
+            throws ResourceNotFoundException {
+
+        // Verify conversation belongs to user
+        getConversation(conversationId, username);
+
+        return messageRepository
+                .findByConversationIdOrderByCreatedAtAsc(conversationId)
+                .stream()
+                .map(message -> {
+
+                    if ("USER".equalsIgnoreCase(message.getRole().toString())) {
+                        return "User: " + message.getContent();
+                    }
+
+                    return "Assistant: " + message.getContent();
+
+                })
+                .toList();
     }
 
 }

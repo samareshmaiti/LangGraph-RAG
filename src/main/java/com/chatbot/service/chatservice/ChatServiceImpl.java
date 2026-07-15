@@ -6,21 +6,17 @@ import com.chatbot.model.chatbot.ChatRequest;
 import com.chatbot.model.chatbot.ChatResponse;
 import com.chatbot.model.dto.request.CreateConversationRequest;
 import com.chatbot.model.dto.request.MessageRequest;
-
-import org.bsc.langgraph4j.CompiledGraph;
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
+import org.bsc.langgraph4j.CompiledGraph;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
-
 
 @Service
 @Slf4j
@@ -28,38 +24,34 @@ import java.util.UUID;
 @Transactional
 public class ChatServiceImpl implements ChatService {
 
-
     private final MessageService messageService;
     private final ConversationService conversationService;
     private final CompiledGraph<ChatState> compiledChatGraph;
 
-
-
     @Override
     public ChatResponse chat(ChatRequest request, String username) throws ResourceNotFoundException {
-        log.info("Processing chat request. username={}, conversationId={}", username, request.getChatId());
 
-         // STEP 1:Create conversation if first message
+        log.info("Processing chat request. username={}, conversationId={}",
+                username, request.getChatId());
 
         UUID conversationId = request.getChatId();
+
+        // Create conversation for first message
         if (conversationId == null) {
-            conversationId =
-                    conversationService.createConversation(
-                            CreateConversationRequest.builder()
-                                    .title(request.getMessage())
-                                    .build(),
-                            username
-                    );
+
+            conversationId = conversationService.createConversation(
+                    CreateConversationRequest.builder()
+                            .title(request.getMessage())
+                            .build(),
+                    username
+            );
+
             request.setChatId(conversationId);
-            log.info("New conversation created {}", conversationId);
+
+            log.info("Created new conversation {}", conversationId);
         }
 
-
-
-        /*
-         * STEP 2:
-         * Save user message
-         */
+        // Save current user message
         messageService.saveUserMessage(
                 MessageRequest.builder()
                         .conversationId(conversationId)
@@ -67,29 +59,34 @@ public class ChatServiceImpl implements ChatService {
                         .build(),
                 username
         );
-        // Create LangGraph state
 
-        ChatState state = new ChatState();
-        state.setConversationId(conversationId);
-        state.setUsername(username);
-        state.setUserMessage(request.getMessage());
+        // Load complete conversation history
+        List<String> chatHistory =
+                messageService.getConversationHistory(conversationId, username);
 
-         // STEP 4: Execute LangGraph
+        // Build graph input
+        Map<String, Object> input = new HashMap<>();
+        input.put(ChatState.CONVERSATION_ID, conversationId);
+        input.put(ChatState.USERNAME, username);
+        input.put(ChatState.USER_MESSAGE, request.getMessage());
+        input.put(ChatState.CHAT_HISTORY, chatHistory);
 
         ChatState finalState;
+
         try {
-            Map<String, Object> input = new HashMap<>();
-            input.put(ChatState.CONVERSATION_ID, conversationId);
-            input.put(ChatState.USERNAME, username);
-            input.put(ChatState.USER_MESSAGE, request.getMessage());
 
-            Optional<ChatState> result = compiledChatGraph.invoke(input).map(ChatState.class::cast);
-            finalState = result.orElseThrow(() -> new RuntimeException("Graph returned empty state"));
+            finalState = compiledChatGraph
+                    .invoke(input)
+                    .map(ChatState.class::cast)
+                    .orElseThrow(() ->
+                            new RuntimeException("Graph returned empty state"));
 
-        } catch (Exception e) {
-            log.error("AI graph execution failed", e);
-            throw new RuntimeException(e);
+        } catch (Exception ex) {
+
+            log.error("Failed to execute LangGraph", ex);
+            throw new RuntimeException("AI processing failed", ex);
         }
+
         // Save assistant response
         messageService.saveAssistantMessage(
                 conversationId,
@@ -99,8 +96,6 @@ public class ChatServiceImpl implements ChatService {
                 finalState.getTotalTokens(),
                 username
         );
-
-         // Return API response
 
         return ChatResponse.builder()
                 .conversationId(conversationId)

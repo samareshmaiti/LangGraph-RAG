@@ -42,7 +42,7 @@ public class RagConfig {
         return PgVectorEmbeddingStore.builder()
                 .host("localhost")
                 .port(5432)
-                .database("chatbot")
+                .database("chatbot_db")
                 .user(username)
                 .password(password)
                 .table("knowledge_embeddings")

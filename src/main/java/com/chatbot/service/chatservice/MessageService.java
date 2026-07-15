@@ -4,6 +4,7 @@ package com.chatbot.service.chatservice;
 import com.chatbot.exception.ResourceNotFoundException;
 import com.chatbot.model.dto.request.MessageRequest;
 import com.chatbot.model.dto.response.MessageResponse;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,4 +29,8 @@ public interface MessageService {
      * Delete a message.
      */
     void deleteMessage(UUID messageId, String username) throws ResourceNotFoundException;
+
+    @Transactional(readOnly = true)
+    List<String> getConversationHistory(UUID conversationId, String username)
+            throws ResourceNotFoundException;
 }

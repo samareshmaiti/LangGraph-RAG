@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -25,6 +26,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
+@Slf4j
 public class WebSecurityConfiguration {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -77,21 +79,27 @@ public class WebSecurityConfiguration {
     }
 
 
+
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint() {
 
         return (request, response, authException) -> {
+
+            log.error("401 ENTRY POINT");
+            log.error("URI = {}", request.getRequestURI());
+            log.error("METHOD = {}", request.getMethod());
+            log.error("EXCEPTION = ", authException);
 
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
             response.setContentType("application/json");
 
             response.getWriter().write("""
-                    {
-                      "status": 401,
-                      "message": "Unauthorized: Valid JWT token required"
-                    }
-                    """);
+        {
+          "status":401,
+          "message":"Unauthorized: Valid JWT token required"
+        }
+        """);
         };
     }
 

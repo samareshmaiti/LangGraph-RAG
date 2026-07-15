@@ -7,6 +7,7 @@ import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,11 @@ public class EmbeddingStoreServiceImpl implements EmbeddingStoreService {
 
     private final EmbeddingStore<TextSegment> embeddingStore;
 
+    @PostConstruct
+    public void init() {
+        log.info("EmbeddingModel implementation = {}",
+                embeddingModel.getClass().getName());
+    }
     @Override
     public void store(List<TextSegment> segments) {
 
