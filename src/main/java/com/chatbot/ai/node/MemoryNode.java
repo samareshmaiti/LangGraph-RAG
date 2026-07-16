@@ -1,17 +1,14 @@
 package com.chatbot.ai.node;
 
-import com.chatbot.ai.state.ChatState;
-import com.chatbot.exception.ResourceNotFoundException;
-import com.chatbot.model.dto.response.MessageResponse;
-import com.chatbot.service.chatservice.MessageService;
 
+import com.chatbot.ai.state.ChatState;
+import com.chatbot.model.chatbot.ConversationMemory;
+import com.chatbot.service.chatservice.ConversationMemoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.bsc.langgraph4j.action.NodeAction;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 
 @Component
@@ -19,23 +16,15 @@ import java.util.Map;
 @Slf4j
 public class MemoryNode implements NodeAction<ChatState> {
 
-
-    private final MessageService messageService;
-
+    private final ConversationMemoryService memoryService;
 
     @Override
-    public Map<String, Object> apply(ChatState state) throws Exception {
+    public Map<String, Object> apply(ChatState state) {
+        log.info("Loading conversation memory");
 
-        List<MessageResponse> messages = messageService.getConversationMessages(
-                        state.getConversationId(),
-                        state.getUsername()
-                );
+        ConversationMemory memory = memoryService.loadMemory(state.getConversationId(), state.getUsername());
+        return Map.of( ChatState.CHAT_HISTORY, memory.messages(), ChatState.SUCCESS, true);
 
-        String context = messages.stream()
-                        .map(message ->
-                                message.getRole() + ": " + message.getContent())
-                        .reduce("", (a, b) -> a + "\n" + b);
-
-        return Map.of(ChatState.CONVERSATION_CONTEXT, context, ChatState.SUCCESS, true);
     }
+
 }

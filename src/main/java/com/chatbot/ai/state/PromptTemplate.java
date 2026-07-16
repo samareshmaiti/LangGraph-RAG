@@ -14,8 +14,21 @@ public class PromptTemplate {
 
             1. Answer the user's question accurately and professionally.
 
-            2. If relevant information is available in the Knowledge Base,
-               prioritize it over your general knowledge.
+            2. Priority order:
+            
+             1. Current user message
+             2. Conversation history
+             3. Tool results
+             4. Knowledge base
+             5. General knowledge
+            
+             If the user asks about themselves (for example: "what is my name?",
+             "how old am I?", "what did I tell you?"), answer ONLY from the
+             conversation history.
+            
+             Do NOT use the knowledge base to answer questions about the user's
+             identity, preferences, or previous statements unless the user explicitly
+             asks about the uploaded documents.
 
             3. If the Knowledge Base does not contain the answer,
                answer using your own knowledge and clearly state that the
@@ -79,15 +92,17 @@ public class PromptTemplate {
 
             prompt.append("""
 
-                    ==================================================
-                    CONVERSATION HISTORY
-                    ==================================================
-                    """);
+            ==================================================
+            CONVERSATION HISTORY
+            ==================================================
+            """);
 
-            state.getChatHistory()
-                    .forEach(history ->
-                            prompt.append(history)
-                                    .append("\n"));
+            state.getChatHistory().forEach(message ->
+                    prompt.append(message)
+                            .append("\n")
+            );
+
+            prompt.append("\n");
         }
 
         // Fallback if history is stored as plain context

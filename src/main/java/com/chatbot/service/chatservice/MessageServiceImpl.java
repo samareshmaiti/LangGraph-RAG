@@ -119,5 +119,20 @@ public class MessageServiceImpl implements MessageService {
                 })
                 .toList();
     }
+    @Override
+    @Transactional(readOnly = true)
+    public List<MessageResponse> getRecentMessages(
+            UUID conversationId,
+            String username)
+            throws ResourceNotFoundException {
+
+        getConversation(conversationId, username);
+
+        return messageRepository
+                .findTop20ByConversationIdOrderByCreatedAtDesc(conversationId)
+                .stream()
+                .map(messageMapper::toResponse)
+                .toList();
+    }
 
 }

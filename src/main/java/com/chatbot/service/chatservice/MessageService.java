@@ -33,4 +33,8 @@ public interface MessageService {
     @Transactional(readOnly = true)
     List<String> getConversationHistory(UUID conversationId, String username)
             throws ResourceNotFoundException;
+    List<MessageResponse> getRecentMessages(
+            UUID conversationId,
+            String username)
+            throws ResourceNotFoundException;
 }

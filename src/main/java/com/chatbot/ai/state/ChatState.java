@@ -1,5 +1,6 @@
 package com.chatbot.ai.state;
 
+import com.chatbot.model.dto.response.MessageResponse;
 import org.bsc.langgraph4j.prebuilt.MessagesState;
 
 import java.util.HashMap;
@@ -27,36 +28,13 @@ public class ChatState extends MessagesState<String> {
     public static final String CURRENT_AGENT = "currentAgent";
     private List<String> retrievedContext;
 
+    //Constructor, Required by LangGraph4j
+    public ChatState() {super(new HashMap<>());}
 
-    /**
-     * Required by LangGraph4j
-     */
-    public ChatState() {
-        super(new HashMap<>());
-    }
-
-    /**
-     * Used while creating state
-     */
-    public ChatState(Map<String, Object> initData) {
-        super(initData);
-    }
-
-    // ----------------------------------------------------
-    // Generic Methods
-    // ----------------------------------------------------
-
-    public void put(String key, Object value) {
-        data().put(key, value);
-    }
-
-    public void putAll(Map<String, Object> values) {
-        data().putAll(values);
-    }
-
-    // ----------------------------------------------------
-    // Getters
-    // ----------------------------------------------------
+  //state creation--- Used while creating state
+    public ChatState(Map<String, Object> initData) {super(initData);}
+    public void put(String key, Object value) {data().put(key, value);}
+    public void putAll(Map<String, Object> values) {data().putAll(values);}
 
     public UUID getConversationId() {
         return value(CONVERSATION_ID)
@@ -130,69 +108,14 @@ public class ChatState extends MessagesState<String> {
                 .orElse(null);
     }
 
-    // ----------------------------------------------------
-    // Setters
-    // ----------------------------------------------------
-
-    public void setConversationId(UUID conversationId) {
-        put(CONVERSATION_ID, conversationId);
-    }
-
-    public void setUsername(String username) {
-        put(USERNAME, username);
-    }
-
-    public void setUserMessage(String userMessage) {
-        put(USER_MESSAGE, userMessage);
-    }
-
-    public void setConversationContext(String context) {
-        put(CONVERSATION_CONTEXT, context);
-    }
-
-    public void setPrompt(String prompt) {
-        put(PROMPT, prompt);
-    }
-
-    public void setAssistantMessage(String assistantMessage) {
-        put(ASSISTANT_MESSAGE, assistantMessage);
-    }
-
-    public void setModel(String model) {
-        put(MODEL, model);
-    }
-
-    public void setPromptTokens(Integer promptTokens) {
-        put(PROMPT_TOKENS, promptTokens);
-    }
-
-    public void setCompletionTokens(Integer completionTokens) {
-        put(COMPLETION_TOKENS, completionTokens);
-    }
-
-    public void setTotalTokens(Integer totalTokens) {
-        put(TOTAL_TOKENS, totalTokens);
-    }
-
-    public void setSuccess(Boolean success) {
-        put(SUCCESS, success);
-    }
-
-    public void setError(String error) {
-        put(ERROR, error);
-    }
     @SuppressWarnings("unchecked")
     public List<String> getChatHistory() {
-
         return value(CHAT_HISTORY)
                 .map(v -> (List<String>) v)
                 .orElse(List.of());
     }
-
-
     @SuppressWarnings("unchecked")
     public List<String> getRetrievedContext() {
-
         return value(RETRIEVED_CONTEXT)
                 .map(v -> (List<String>) v)
                 .orElse(List.of());
@@ -200,28 +123,55 @@ public class ChatState extends MessagesState<String> {
 
 
     public String getCurrentAgent() {
-
         return value(CURRENT_AGENT)
                 .map(String.class::cast)
                 .orElse("GENERAL");
     }
     @SuppressWarnings("unchecked")
     public List<String> getToolResults() {
-
         return value(TOOL_RESULTS)
                 .map(v -> (List<String>) v)
                 .orElse(List.of());
     }
     public void setChatHistory(List<String> history) {
         put(CHAT_HISTORY, history);
+    }    public void setConversationId(UUID conversationId) {put(CONVERSATION_ID, conversationId);}
+    public void setUsername(String username) {
+        put(USERNAME, username);
     }
-
-
+    public void setUserMessage(String userMessage) {
+        put(USER_MESSAGE, userMessage);
+    }
+    public void setConversationContext(String context) {
+        put(CONVERSATION_CONTEXT, context);
+    }
+    public void setPrompt(String prompt) {
+        put(PROMPT, prompt);
+    }
+    public void setAssistantMessage(String assistantMessage) {
+        put(ASSISTANT_MESSAGE, assistantMessage);
+    }
+    public void setModel(String model) {
+        put(MODEL, model);
+    }
+    public void setPromptTokens(Integer promptTokens) {
+        put(PROMPT_TOKENS, promptTokens);
+    }
+    public void setCompletionTokens(Integer completionTokens) {
+        put(COMPLETION_TOKENS, completionTokens);
+    }
+    public void setTotalTokens(Integer totalTokens) {
+        put(TOTAL_TOKENS, totalTokens);
+    }
+    public void setSuccess(Boolean success) {
+        put(SUCCESS, success);
+    }
+    public void setError(String error) {
+        put(ERROR, error);
+    }
     public void setRetrievedContext(List<String> context) {
         put(RETRIEVED_CONTEXT, context);
     }
-
-
     public void setCurrentAgent(String agent) {
         put(CURRENT_AGENT, agent);
     }

@@ -11,6 +11,7 @@ import java.util.UUID;
 public interface MessageRepository extends JpaRepository<Message, UUID> {
 
     List<Message> findByConversationIdOrderByCreatedAtAsc(UUID conversationId);
+    List<Message> findTop20ByConversationIdOrderByCreatedAtDesc(UUID conversationId);
 
     List<Message> findByConversationIdAndRole(UUID conversationId,
                                               MessageRole role);

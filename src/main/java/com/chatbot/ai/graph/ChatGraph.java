@@ -6,6 +6,7 @@ import com.chatbot.ai.provider.AiProvider;
 import com.chatbot.ai.state.ChatState;
 import com.chatbot.ai.state.PromptTemplate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bsc.langgraph4j.CompiledGraph;
 import org.bsc.langgraph4j.StateGraph;
 import org.bsc.langgraph4j.action.AsyncNodeAction;
@@ -17,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
 import static org.bsc.langgraph4j.GraphDefinition.END;
 import static org.bsc.langgraph4j.GraphDefinition.START;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ChatGraph {
@@ -52,6 +54,7 @@ public class ChatGraph {
             return CompletableFuture.completedFuture(result);
         };
         AsyncNodeAction<ChatState> memoryAction = state -> {
+            log.info("Executing memory node");
 
             Map<String,Object> result =
                     null;
