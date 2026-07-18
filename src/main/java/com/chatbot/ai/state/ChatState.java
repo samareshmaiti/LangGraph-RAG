@@ -26,7 +26,6 @@ public class ChatState extends MessagesState<String> {
     public static final String RETRIEVED_CONTEXT = "retrievedContext";
     public static final String TOOL_RESULTS = "toolResults";
     public static final String CURRENT_AGENT = "currentAgent";
-    private List<String> retrievedContext;
 
     //Constructor, Required by LangGraph4j
     public ChatState() {super(new HashMap<>());}

@@ -15,7 +15,7 @@ public class ResponseNode implements NodeAction<ChatState> {
     public Map<String, Object> apply(ChatState state) {
 
         log.info("Formatting response");
-        if (!state.isSuccess()) {
+        if (!Boolean.TRUE.equals(state.isSuccess())) {
             return Map.of(ChatState.SUCCESS, false, ChatState.ERROR, state.getError());
         }
 

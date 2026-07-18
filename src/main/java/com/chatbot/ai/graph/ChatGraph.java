@@ -1,10 +1,8 @@
 package com.chatbot.ai.graph;
 
-import com.chatbot.ai.node.MemoryNode;
-import com.chatbot.ai.node.RetrievalNode;
+import com.chatbot.ai.node.*;
 import com.chatbot.ai.provider.AiProvider;
 import com.chatbot.ai.state.ChatState;
-import com.chatbot.ai.state.PromptTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.langgraph4j.CompiledGraph;
@@ -23,87 +21,37 @@ import static org.bsc.langgraph4j.GraphDefinition.START;
 @RequiredArgsConstructor
 public class ChatGraph {
 
-    private final PromptTemplate promptTemplate;
-    private final AiProvider aiProvider;
     private final MemoryNode memoryNode;
     private final RetrievalNode retrievalNode;
+    private final PromptNode promptNode;
+    private final AiProvider aiProvider;
+    private final ResponseNode responseNode;
+    private final LlmNode llmNode;
 
     public CompiledGraph<ChatState> build() throws Exception {
 
-        AsyncNodeAction<ChatState> promptAction = state -> {
+        AsyncNodeAction<ChatState> memoryAction = state ->
+                CompletableFuture.completedFuture(memoryNode.apply(state));
 
-            String prompt = promptTemplate.build(state);
+        AsyncNodeAction<ChatState> retrievalAction = state ->
+                CompletableFuture.completedFuture(retrievalNode.apply(state));
 
-            return CompletableFuture.completedFuture(
-                    Map.of(
-                            ChatState.PROMPT, prompt,
-                            ChatState.SUCCESS, true
-                    )
-            );
-        };
-        AsyncNodeAction<ChatState> retrievalAction = state -> {
-
-            Map<String, Object> result;
-
-            try {
-                result = retrievalNode.apply(state);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
-            return CompletableFuture.completedFuture(result);
-        };
-        AsyncNodeAction<ChatState> memoryAction = state -> {
-            log.info("Executing memory node");
-
-            Map<String,Object> result =
-                    null;
-            try {
-                result = memoryNode.apply(state);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
-            return CompletableFuture.completedFuture(result);
-        };
-        AsyncNodeAction<ChatState> llmAction = state -> {
-
-            String response = aiProvider.generate(state);
-
-            return CompletableFuture.completedFuture(
-                    Map.of(
-                            ChatState.ASSISTANT_MESSAGE, response,
-                            ChatState.SUCCESS, true
-                    )
-            );
-        };
-
-        AsyncNodeAction<ChatState> responseAction = state -> {
-
-            String response = state.getAssistantMessage();
-
-            if (response == null) {
-                response = "";
-            }
-
-            response = response.trim();
-
-            return CompletableFuture.completedFuture(
-                    Map.of(
-                            ChatState.ASSISTANT_MESSAGE, response,
-                            ChatState.SUCCESS, true
-                    )
-            );
-        };
+        AsyncNodeAction<ChatState> promptAction = state ->
+                CompletableFuture.completedFuture(promptNode.apply(state));
+        AsyncNodeAction<ChatState> responseAction =
+                state -> CompletableFuture.completedFuture(responseNode.apply(state));
+        AsyncNodeAction<ChatState> llmAction =
+                state -> CompletableFuture.completedFuture(llmNode.apply(state));
 
         return new StateGraph<>(ChatState.SCHEMA, ChatState::new)
-                .addNode("memory",memoryAction)
+
+                .addNode("memory", memoryAction)
                 .addNode("retrieval", retrievalAction)
                 .addNode("prompt", promptAction)
                 .addNode("llm", llmAction)
                 .addNode("response", responseAction)
 
-                .addEdge(START,"memory")
+                .addEdge(START, "memory")
                 .addEdge("memory", "retrieval")
                 .addEdge("retrieval", "prompt")
                 .addEdge("prompt", "llm")

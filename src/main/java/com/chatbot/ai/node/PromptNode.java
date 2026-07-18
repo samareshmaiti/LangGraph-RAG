@@ -1,7 +1,7 @@
 package com.chatbot.ai.node;
 
+import com.chatbot.ai.prompt.PromptFactory;
 import com.chatbot.ai.state.ChatState;
-import com.chatbot.ai.state.PromptTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.langgraph4j.action.NodeAction;
@@ -14,15 +14,21 @@ import java.util.Map;
 @Slf4j
 public class PromptNode implements NodeAction<ChatState> {
 
-    private final PromptTemplate promptTemplate;
+    private final PromptFactory promptFactory;
 
     @Override
     public Map<String, Object> apply(ChatState state) {
 
-        log.info("Building prompt...");
+        String agent = state.getCurrentAgent();
 
-        String prompt = promptTemplate.build(state);
-        log.debug("Prompt length: {} characters", prompt.length());
+        log.info("Building prompt for agent: {}", agent);
+
+        String prompt = promptFactory
+                .getPrompt(agent)
+                .build(state);
+
+        log.debug("Prompt:\n{}", prompt);
+
         return Map.of(
                 ChatState.PROMPT, prompt,
                 ChatState.SUCCESS, true

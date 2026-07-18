@@ -53,62 +53,31 @@ public class PromptTemplate {
     public String build(ChatState state) {
 
         StringBuilder prompt = new StringBuilder();
-
-        // =====================================================
         // System Prompt
-        // =====================================================
-
         prompt.append(SYSTEM_PROMPT);
+        prompt.append("\n\nCurrent Date: ").append(LocalDate.now());
 
-        prompt.append("\n\nCurrent Date: ")
-                .append(LocalDate.now());
-
-        // =====================================================
         // Retrieved Knowledge (RAG)
-        // =====================================================
-
         if (!state.getRetrievedContext().isEmpty()) {
-
-            prompt.append("""
-
-                    ==================================================
+            prompt.append(""" 
                     KNOWLEDGE BASE
-                    ==================================================
-                    """);
-
-            state.getRetrievedContext()
-                    .forEach(chunk ->
-                            prompt.append("- ")
-                                    .append(chunk)
-                                    .append("\n")
-                    );
+    """);
+            state.getRetrievedContext().forEach(chunk ->
+                            prompt.append("- ").append(chunk).append("\n"));
         }
 
-        // =====================================================
         // Conversation History
-        // =====================================================
-
         if (!state.getChatHistory().isEmpty()) {
-
             prompt.append("""
-
-            ==================================================
-            CONVERSATION HISTORY
-            ==================================================
+            CONVERSATION HISTORY 
             """);
-
-            state.getChatHistory().forEach(message ->
-                    prompt.append(message)
-                            .append("\n")
-            );
-
+            state.getChatHistory().forEach(message -> prompt.append(message)
+                            .append("\n"));
             prompt.append("\n");
         }
 
         // Fallback if history is stored as plain context
-
-        else if (state.getConversationContext() != null &&
-                !state.getConversationContext().isBlank()) {
+        else if (state.getConversationContext() != null && !state.getConversationContext().isBlank()) {
 
             prompt.append("""
 
@@ -117,8 +86,7 @@ public class PromptTemplate {
                     ==================================================
                     """);
 
-            prompt.append(state.getConversationContext())
-                    .append("\n");
+            prompt.append(state.getConversationContext()).append("\n");
         }
 
         // =====================================================
