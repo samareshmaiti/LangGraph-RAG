@@ -1,7 +1,9 @@
 package com.chatbot.config;
 
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.model.ollama.OllamaEmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.pgvector.PgVectorEmbeddingStore;
@@ -33,6 +35,15 @@ public class RagConfig {
         return OllamaEmbeddingModel.builder()
                 .baseUrl(baseUrl)
                 .modelName(embeddingModel)
+                .build();
+    }
+    @Bean
+    public ChatModel chatModel(@Value("${ollama.model}") String chatModel) {
+
+        return OllamaChatModel.builder()
+                .baseUrl(baseUrl)
+                .modelName(chatModel)
+                .temperature(0.2)
                 .build();
     }
 

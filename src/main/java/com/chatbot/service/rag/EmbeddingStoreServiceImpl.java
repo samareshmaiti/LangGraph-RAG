@@ -30,25 +30,20 @@ public class EmbeddingStoreServiceImpl implements EmbeddingStoreService {
 
     @PostConstruct
     public void init() {
-        log.info("EmbeddingModel implementation = {}",
-                embeddingModel.getClass().getName());
+        log.info("EmbeddingModel implementation = {}", embeddingModel.getClass().getName());
     }
 
     @Override
-    public void store(KnowledgeDocument document,
-                      List<TextSegment> segments) {
+    public void store(KnowledgeDocument document, List<TextSegment> segments) {
 
         if (segments == null || segments.isEmpty()) {
             return;
         }
-
         log.info("Generating embeddings for {} chunks", segments.size());
 
         // Save chunks in database
         for (int i = 0; i < segments.size(); i++) {
-
             TextSegment segment = segments.get(i);
-
             DocumentChunk chunk = DocumentChunk.builder()
                     .document(document)
                     .chunkIndex(i)
@@ -60,12 +55,10 @@ public class EmbeddingStoreServiceImpl implements EmbeddingStoreService {
         }
 
         // Generate embeddings
-        List<Embedding> embeddings =
-                embeddingModel.embedAll(segments).content();
+        List<Embedding> embeddings = embeddingModel.embedAll(segments).content();
 
         // Store in vector database
         embeddingStore.addAll(embeddings, segments);
-
         log.info("Successfully stored {} embeddings", embeddings.size());
     }
 

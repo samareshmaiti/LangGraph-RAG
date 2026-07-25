@@ -1,6 +1,6 @@
 # ChatBot Application
 
-A sophisticated AI-powered chatbot application built with Spring Boot, LangChain4j, and LangGraph4j. This application features Retrieval-Augmented Generation (RAG), conversation memory, JWT authentication, and document processing capabilities.
+A sophisticated AI-powered chatbot application built with Spring Boot,Spring AI, LangChain4j, and LangGraph4j. This application features Retrieval-Augmented Generation (RAG), conversation memory, JWT authentication, and document processing capabilities.
 ## Overview
 
 This chatbot application provides an intelligent conversational interface that can:

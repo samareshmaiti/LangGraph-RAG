@@ -23,9 +23,7 @@ public class ChunkingServiceImpl implements ChunkingService {
     public List<TextSegment> chunk(String text) {
 
         Document document = Document.from(text);
-
-        DocumentByParagraphSplitter splitter =
-                new DocumentByParagraphSplitter(
+        DocumentByParagraphSplitter splitter = new DocumentByParagraphSplitter(
                         MAX_SEGMENT_SIZE,
                         MAX_OVERLAP_SIZE
                 );

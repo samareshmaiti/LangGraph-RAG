@@ -20,18 +20,42 @@ public class LlmNode implements NodeAction<ChatState> {
     public Map<String, Object> apply(ChatState state) {
 
         log.info("Executing LLM Node");
+
         if (state.getPrompt() == null || state.getPrompt().isBlank()) {
-            return Map.of(ChatState.SUCCESS, false, ChatState.ERROR, "Prompt is empty.");
+            return Map.of(
+                    ChatState.SUCCESS, false,
+                    ChatState.ERROR, "Prompt is empty."
+            );
         }
 
         try {
+
             String response = aiProvider.generate(state);
-            return Map.of(ChatState.ASSISTANT_MESSAGE, response, ChatState.SUCCESS, true);
+
+            // Calculate token counts here
+            int promptTokens = estimateTokens(state.getPrompt());
+            int completionTokens = estimateTokens(response);
+
+            return Map.of(
+                    ChatState.ASSISTANT_MESSAGE, response,
+                    ChatState.PROMPT_TOKENS, promptTokens,
+                    ChatState.COMPLETION_TOKENS, completionTokens,
+                    ChatState.TOTAL_TOKENS, promptTokens + completionTokens,
+                    ChatState.SUCCESS, true
+            );
 
         } catch (Exception ex) {
 
             log.error("LLM Error", ex);
-            return Map.of(ChatState.SUCCESS, false, ChatState.ERROR, ex.getMessage());
+
+            return Map.of(
+                    ChatState.SUCCESS, false,
+                    ChatState.ERROR, ex.getMessage()
+            );
         }
+    }
+
+    private int estimateTokens(String text) {
+        return text == null ? 0 : text.split("\\s+").length;
     }
 }
