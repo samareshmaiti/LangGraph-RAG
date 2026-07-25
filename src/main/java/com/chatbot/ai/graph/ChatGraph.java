@@ -24,9 +24,11 @@ public class ChatGraph {
     private final MemoryNode memoryNode;
     private final RetrievalNode retrievalNode;
     private final PromptNode promptNode;
+    private final RouterNode routerNode;
     private final AiProvider aiProvider;
     private final ResponseNode responseNode;
     private final LlmNode llmNode;
+    private final ToolExecutorNode toolExecutorNode;
 
     public CompiledGraph<ChatState> build() throws Exception {
 
@@ -38,6 +40,10 @@ public class ChatGraph {
 
         AsyncNodeAction<ChatState> promptAction = state ->
                 CompletableFuture.completedFuture(promptNode.apply(state));
+        AsyncNodeAction<ChatState> routerAction =
+                state -> CompletableFuture.completedFuture(routerNode.apply(state));
+        AsyncNodeAction<ChatState> toolAction =
+                state -> CompletableFuture.completedFuture(toolExecutorNode.apply(state));
         AsyncNodeAction<ChatState> responseAction =
                 state -> CompletableFuture.completedFuture(responseNode.apply(state));
         AsyncNodeAction<ChatState> llmAction =
@@ -48,13 +54,17 @@ public class ChatGraph {
                 .addNode("memory", memoryAction)
                 .addNode("retrieval", retrievalAction)
                 .addNode("prompt", promptAction)
+                .addNode("router", routerAction)
+                .addNode("tool", toolAction)
                 .addNode("llm", llmAction)
                 .addNode("response", responseAction)
 
                 .addEdge(START, "memory")
                 .addEdge("memory", "retrieval")
                 .addEdge("retrieval", "prompt")
-                .addEdge("prompt", "llm")
+                .addEdge("prompt", "router")
+                .addEdge("router", "tool")
+                .addEdge("tool", "llm")
                 .addEdge("llm", "response")
                 .addEdge("response", END)
 

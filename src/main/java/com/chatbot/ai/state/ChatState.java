@@ -26,11 +26,12 @@ public class ChatState extends MessagesState<String> {
     public static final String RETRIEVED_CONTEXT = "retrievedContext";
     public static final String TOOL_RESULTS = "toolResults";
     public static final String CURRENT_AGENT = "currentAgent";
+    public static final String ROUTER_RESULT = "routerResult";
 
     //Constructor, Required by LangGraph4j
     public ChatState() {super(new HashMap<>());}
 
-  //state creation--- Used while creating state
+    //state creation--- Used while creating state
     public ChatState(Map<String, Object> initData) {super(initData);}
     public void put(String key, Object value) {data().put(key, value);}
     public void putAll(Map<String, Object> values) {data().putAll(values);}
@@ -132,6 +133,18 @@ public class ChatState extends MessagesState<String> {
                 .map(v -> (List<String>) v)
                 .orElse(List.of());
     }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getRouterResult() {
+        return value(ROUTER_RESULT)
+                .map(v -> (Map<String, Object>) v)
+                .orElse(null);
+    }
+
+    public void setRouterResult(Map<String, Object> routerResult) {
+        put(ROUTER_RESULT, routerResult);
+    }
+
     public void setChatHistory(List<String> history) {
         put(CHAT_HISTORY, history);
     }    public void setConversationId(UUID conversationId) {put(CONVERSATION_ID, conversationId);}
