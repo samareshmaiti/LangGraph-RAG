@@ -1,5 +1,4 @@
 package com.chatbot.ai.graph;
-
 import com.chatbot.ai.node.*;
 import com.chatbot.ai.provider.AiProvider;
 import com.chatbot.ai.state.ChatState;
@@ -23,9 +22,10 @@ public class ChatGraph {
 
     private final MemoryNode memoryNode;
     private final RetrievalNode retrievalNode;
+    private final AgentClassifierNode agentClassifierNode;
+    private final AgentInterpreterNode agentInterpreterNode;
     private final PromptNode promptNode;
     private final RouterNode routerNode;
-    private final AiProvider aiProvider;
     private final ResponseNode responseNode;
     private final LlmNode llmNode;
     private final ToolExecutorNode toolExecutorNode;
@@ -38,21 +38,33 @@ public class ChatGraph {
         AsyncNodeAction<ChatState> retrievalAction = state ->
                 CompletableFuture.completedFuture(retrievalNode.apply(state));
 
+        AsyncNodeAction<ChatState> classifierAction = state ->
+                CompletableFuture.completedFuture(agentClassifierNode.apply(state));
+
+        AsyncNodeAction<ChatState> interpreterAction = state ->
+                CompletableFuture.completedFuture(agentInterpreterNode.apply(state));
+
         AsyncNodeAction<ChatState> promptAction = state ->
                 CompletableFuture.completedFuture(promptNode.apply(state));
+
         AsyncNodeAction<ChatState> routerAction =
                 state -> CompletableFuture.completedFuture(routerNode.apply(state));
+
         AsyncNodeAction<ChatState> toolAction =
                 state -> CompletableFuture.completedFuture(toolExecutorNode.apply(state));
-        AsyncNodeAction<ChatState> responseAction =
-                state -> CompletableFuture.completedFuture(responseNode.apply(state));
+
         AsyncNodeAction<ChatState> llmAction =
                 state -> CompletableFuture.completedFuture(llmNode.apply(state));
+
+        AsyncNodeAction<ChatState> responseAction =
+                state -> CompletableFuture.completedFuture(responseNode.apply(state));
 
         return new StateGraph<>(ChatState.SCHEMA, ChatState::new)
 
                 .addNode("memory", memoryAction)
                 .addNode("retrieval", retrievalAction)
+                .addNode("agentClassifier", classifierAction)
+                .addNode("agentInterpreter", interpreterAction)
                 .addNode("prompt", promptAction)
                 .addNode("router", routerAction)
                 .addNode("tool", toolAction)
@@ -61,7 +73,9 @@ public class ChatGraph {
 
                 .addEdge(START, "memory")
                 .addEdge("memory", "retrieval")
-                .addEdge("retrieval", "prompt")
+                .addEdge("retrieval", "agentClassifier")
+                .addEdge("agentClassifier", "agentInterpreter")
+                .addEdge("agentInterpreter", "prompt")
                 .addEdge("prompt", "router")
                 .addEdge("router", "tool")
                 .addEdge("tool", "llm")

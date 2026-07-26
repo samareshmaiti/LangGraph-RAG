@@ -40,7 +40,7 @@ public class CodingNode implements NodeAction<ChatState> {
             return Map.of();
         }
 
-        log.info("Executing coding tool");
+        log.info("Executing coding tool with user message {}",userMessage);
 
         // Provide coding assistance - in a real app, this could use a code generation model
         String codingHelp = "I can help you with coding questions. Please provide more details about what you need help with (e.g., language, specific problem, code snippet).";

@@ -15,6 +15,7 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+//responsible for selecting the current tool
 public class RouterNode implements NodeAction<ChatState> {
 
     @Override

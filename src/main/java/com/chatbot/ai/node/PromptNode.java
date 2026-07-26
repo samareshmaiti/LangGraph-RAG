@@ -1,5 +1,6 @@
 package com.chatbot.ai.node;
 
+
 import com.chatbot.ai.prompt.PromptFactory;
 import com.chatbot.ai.state.ChatState;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +19,25 @@ public class PromptNode implements NodeAction<ChatState> {
 
     @Override
     public Map<String, Object> apply(ChatState state) {
+        log.info("Building prompt");
 
+        // Check if we're doing agent classification
+        if (Boolean.TRUE.equals(state.getIsClassificationTask())) {
+            log.info("Building classification prompt");
+            String prompt = promptFactory
+                    .getClassificationPrompt()
+                    .build(state);
+
+            log.debug("Classification Prompt:\n{}", prompt);
+
+            return Map.of(
+                    ChatState.PROMPT, prompt,
+                    ChatState.SUCCESS, true
+            );
+        }
+
+        // Normal agent-based prompt building
         String agent = state.getCurrentAgent();
-
         log.info("Building prompt for agent: {}", agent);
 
         String prompt = promptFactory

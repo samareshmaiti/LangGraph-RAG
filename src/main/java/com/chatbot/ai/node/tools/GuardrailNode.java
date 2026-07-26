@@ -15,7 +15,7 @@ import java.util.Map;
 @Slf4j
 public class GuardrailNode implements NodeAction<ChatState> {
 
-    // Simple list of inappropriate keywords (in a real app, use a proper moderation model)
+    // Simple list of inappropriate keywords
     private static final String[] INAPPROPRIATE_KEYWORDS = {
             "hate", "violence", "harassment", "illegal", "adult", "weapon", "drug"
     };
@@ -41,17 +41,13 @@ public class GuardrailNode implements NodeAction<ChatState> {
         }
 
         if (containsInappropriate) {
+            //Inappropriate result, pause here we can set error message also
             String warning = "Warning: The request contains potentially inappropriate content. I cannot assist with that request.";
             updatedResults.add(warning);
             log.warn("Inappropriate content detected");
-            // Also set an error state? We could set SUCCESS to false and ERROR message
-            // For now, we just add the warning and let LLM handle it
-            return Map.of(
-                    ChatState.TOOL_RESULTS, updatedResults
-            );
+            return Map.of(ChatState.TOOL_RESULTS, updatedResults);
         } else {
             // Optionally add a note that content is safe
-            // currentResults.add("Content passes safety checks.");
             log.info("Content passes safety checks");
             return Map.of(); // No change to state
         }

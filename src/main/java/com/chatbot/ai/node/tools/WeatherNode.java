@@ -1,6 +1,8 @@
 package com.chatbot.ai.node.tools;
 
 import com.chatbot.ai.state.ChatState;
+import com.chatbot.model.chatbot.WeatherRequest;
+import com.chatbot.util.WeatherExtractor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.langgraph4j.action.NodeAction;
@@ -16,111 +18,91 @@ import java.util.Map;
 @Slf4j
 public class WeatherNode implements NodeAction<ChatState> {
 
-    private static final String WEATHER_API_URL = "http://wttr.in/%s?format=%C+%t+%h+%P+%w"; // Simple format
+    private static final String WEATHER_API =
+            "http://wttr.in/%s?format=%C+%t+%h+%P+%w";
+
+    private final WeatherExtractor weatherExtractor;
+
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Override
     public Map<String, Object> apply(ChatState state) {
-        log.info("Checking if weather tool is needed");
 
-        String userMessage = state.getUserMessage().toLowerCase();
-        // Check for weather-related keywords
-        boolean isWeatherQuery = userMessage.contains("weather") ||
-                userMessage.contains("temperature") ||
-                userMessage.contains("forecast") ||
-                userMessage.contains("rain") ||
-                userMessage.contains("snow") ||
-                userMessage.contains("sunny") ||
-                userMessage.contains("cloudy") ||
-                userMessage.contains("humidity");
+        log.info("Weather Tool Started");
 
-        if (!isWeatherQuery) {
-            log.info("Weather tool not needed");
+        String message = state.getUserMessage();
+
+        if (!isWeatherQuestion(message)) {
             return Map.of();
         }
 
-        log.info("Executing weather tool");
+        WeatherRequest request =
+                weatherExtractor.extract(message);
 
-        // Extract location from user message (simple approach: look for capitalized words or after "in")
-        String location = extractLocation(state.getUserMessage());
-        if (location == null || location.isEmpty()) {
-            location = "London"; // default location
+        String location = request.getLocation();
+
+        if (location == null || location.isBlank()) {
+            location = "Bangalore";
         }
 
+        log.info("Location extracted = {}", location);
+
         try {
-            String url = String.format(WEATHER_API_URL, location.replace(" ", "+"));
-            String weatherInfo = restTemplate.getForObject(url, String.class);
 
-            if (weatherInfo == null || weatherInfo.isEmpty()) {
-                weatherInfo = "Weather data not available for " + location;
+            String url = String.format(
+                    WEATHER_API,
+                    location.replace(" ", "+"));
+
+            String weather =
+                    restTemplate.getForObject(url, String.class);
+
+            if (weather == null || weather.isBlank()) {
+                weather = "Weather information unavailable.";
             }
 
-            // Append to existing tool results
-            List<String> currentResults = state.getToolResults();
-            List<String> updatedResults = new ArrayList<>();
-            if (currentResults != null) {
-                updatedResults.addAll(currentResults);
-            }
-            String result = "Weather for " + location + ": " + weatherInfo.trim();
-            updatedResults.add(result);
+            List<String> results =
+                    new ArrayList<>(state.getToolResults());
+
+            results.add(
+                    "Weather for "
+                            + location
+                            + " : "
+                            + weather);
 
             return Map.of(
-                    ChatState.TOOL_RESULTS, updatedResults
+                    ChatState.TOOL_RESULTS,
+                    results
             );
-        } catch (Exception e) {
-            log.error("Error fetching weather data", e);
-            List<String> currentResults = state.getToolResults();
-            List<String> updatedResults = new ArrayList<>();
-            if (currentResults != null) {
-                updatedResults.addAll(currentResults);
-            }
-            updatedResults.add("Unable to retrieve weather information at this time.");
+
+        } catch (Exception ex) {
+
+            log.error("Weather API Error", ex);
+
+            List<String> results =
+                    new ArrayList<>(state.getToolResults());
+
+            results.add(
+                    "Unable to fetch weather."
+            );
 
             return Map.of(
-                    ChatState.TOOL_RESULTS, updatedResults
+                    ChatState.TOOL_RESULTS,
+                    results
             );
         }
     }
 
-    private String extractLocation(String message) {
-        // Simple extraction: look for patterns like "in [location]" or "for [location]"
-        String lowerMsg = message.toLowerCase();
-        int inIndex = lowerMsg.indexOf(" in ");
-        if (inIndex != -1) {
-            // Extract substring after "in "
-            String afterIn = message.substring(inIndex + 3);
-            // Take first word or until punctuation
-            int end = afterIn.length();
-            for (int i = 0; i < afterIn.length(); i++) {
-                char c = afterIn.charAt(i);
-                if (c == ',' || c == '.' || c == '!' || c == '?' || c == ' ') {
-                    end = i;
-                    break;
-                }
-            }
-            if (end > 0) {
-                return afterIn.substring(0, end).trim();
-            }
-            return afterIn.trim();
-        }
+    private boolean isWeatherQuestion(String message) {
 
-        int forIndex = lowerMsg.indexOf(" for ");
-        if (forIndex != -1) {
-            String afterFor = message.substring(forIndex + 5);
-            int end = afterFor.length();
-            for (int i = 0; i < afterFor.length(); i++) {
-                char c = afterFor.charAt(i);
-                if (c == ',' || c == '.' || c == '!' || c == '?' || c == ' ') {
-                    end = i;
-                    break;
-                }
-            }
-            if (end > 0) {
-                return afterFor.substring(0, end).trim();
-            }
-            return afterFor.trim();
-        }
+        String m = message.toLowerCase();
 
-        return null;
+        return m.contains("weather")
+                || m.contains("temperature")
+                || m.contains("forecast")
+                || m.contains("rain")
+                || m.contains("humidity")
+                || m.contains("snow")
+                || m.contains("wind")
+                || m.contains("cloud");
     }
 }

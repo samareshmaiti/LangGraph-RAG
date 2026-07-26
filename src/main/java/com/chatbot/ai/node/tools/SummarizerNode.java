@@ -71,10 +71,11 @@ public class SummarizerNode implements NodeAction<ChatState> {
         if (text == null || text.isEmpty()) {
             return "No content to summarize";
         }
-        // Simple approach: take first 200 characters
-        if (text.length() > 200) {
-            return text.substring(0, 200) + "...";
-        }
+        // can restrict if want to send some fixed length result
+
+//        if (text.length() > 200) {
+//            return text.substring(0, 200) + "...";
+//        }
         return text;
     }
 }

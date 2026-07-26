@@ -27,6 +27,8 @@ public class ChatState extends MessagesState<String> {
     public static final String TOOL_RESULTS = "toolResults";
     public static final String CURRENT_AGENT = "currentAgent";
     public static final String ROUTER_RESULT = "routerResult";
+    public static final String ORIGINAL_USER_MESSAGE = "originalUserMessage";
+    public static final String IS_CLASSIFICATION_TASK = "isClassificationTask";
 
     //Constructor, Required by LangGraph4j
     public ChatState() {super(new HashMap<>());}
@@ -114,6 +116,7 @@ public class ChatState extends MessagesState<String> {
                 .map(v -> (List<String>) v)
                 .orElse(List.of());
     }
+
     @SuppressWarnings("unchecked")
     public List<String> getRetrievedContext() {
         return value(RETRIEVED_CONTEXT)
@@ -122,16 +125,17 @@ public class ChatState extends MessagesState<String> {
     }
 
 
-    public String getCurrentAgent() {
-        return value(CURRENT_AGENT)
-                .map(String.class::cast)
-                .orElse("GENERAL");
-    }
     @SuppressWarnings("unchecked")
     public List<String> getToolResults() {
         return value(TOOL_RESULTS)
                 .map(v -> (List<String>) v)
                 .orElse(List.of());
+    }
+
+    public String getCurrentAgent() {
+        return value(CURRENT_AGENT)
+                .map(String.class::cast)
+                .orElse("GENERAL");
     }
 
     @SuppressWarnings("unchecked")
@@ -141,13 +145,24 @@ public class ChatState extends MessagesState<String> {
                 .orElse(null);
     }
 
+    public String getOriginalUserMessage() {
+        return value(ORIGINAL_USER_MESSAGE)
+                .map(String.class::cast)
+                .orElse(null);
+    }
+
+    public Boolean getIsClassificationTask() {
+        return value(IS_CLASSIFICATION_TASK)
+                .map(Boolean.class::cast)
+                .orElse(false);
+    }
+
     public void setRouterResult(Map<String, Object> routerResult) {
         put(ROUTER_RESULT, routerResult);
     }
 
-    public void setChatHistory(List<String> history) {
-        put(CHAT_HISTORY, history);
-    }    public void setConversationId(UUID conversationId) {put(CONVERSATION_ID, conversationId);}
+    public void setChatHistory(List<String> history) {put(CHAT_HISTORY, history);}
+    public void setConversationId(UUID conversationId) {put(CONVERSATION_ID, conversationId);}
     public void setUsername(String username) {
         put(USERNAME, username);
     }
@@ -166,9 +181,7 @@ public class ChatState extends MessagesState<String> {
     public void setModel(String model) {
         put(MODEL, model);
     }
-    public void setPromptTokens(Integer promptTokens) {
-        put(PROMPT_TOKENS, promptTokens);
-    }
+    public void setPromptTokens(Integer promptTokens) {put(PROMPT_TOKENS, promptTokens);}
     public void setCompletionTokens(Integer completionTokens) {
         put(COMPLETION_TOKENS, completionTokens);
     }
@@ -184,11 +197,14 @@ public class ChatState extends MessagesState<String> {
     public void setRetrievedContext(List<String> context) {
         put(RETRIEVED_CONTEXT, context);
     }
+    public void setToolResults(List<String> results) {put(TOOL_RESULTS, results);}
     public void setCurrentAgent(String agent) {
         put(CURRENT_AGENT, agent);
     }
-    public void setToolResults(List<String> results) {
-
-        put(TOOL_RESULTS, results);
+    public void setOriginalUserMessage(String originalUserMessage) {
+        put(ORIGINAL_USER_MESSAGE, originalUserMessage);
+    }
+    public void setIsClassificationTask(Boolean isClassificationTask) {
+        put(IS_CLASSIFICATION_TASK, isClassificationTask);
     }
 }
