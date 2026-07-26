@@ -20,7 +20,18 @@ public class RetrievalNode implements NodeAction<ChatState> {
 
     @Override
     public Map<String, Object> apply(ChatState state) {
-        log.info("Executing Retrieval Node...");
+        // Only perform retrieval for RAG agent type
+        String currentAgent = state.getCurrentAgent();
+        if (!"RAG".equalsIgnoreCase(currentAgent)) {
+            log.info("Skipping retrieval for agent type: {}", currentAgent);
+            // Return success with empty context to maintain flow
+            return Map.of(
+                    ChatState.RETRIEVED_CONTEXT, java.util.Collections.emptyList(),
+                    ChatState.SUCCESS, true
+            );
+        }
+
+        log.info("Executing Retrieval Node for RAG agent...");
         List<String> context = retrievalService.retrieve(state.getUserMessage());
 
         return Map.of(

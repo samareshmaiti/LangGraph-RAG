@@ -31,6 +31,7 @@ public class RouterNode implements NodeAction<ChatState> {
         String[] planningKeywords = {"plan", "steps", "how to", "strategy", "approach", "process", "roadmap", "organize"};
         String[] summarizerKeywords = {"summarize", "summary", "tl;dr", "brief", "shorten", "abstract", "recap", "summarise"};
         String[] guardrailKeywords = {"hate", "violence", "harassment", "illegal", "adult", "weapon", "drug"};
+        String[] retrievalKeywords = {"what", "who", "when", "where", "why", "how", "explain", "describe", "definition", "meaning of", "what is", "who is", "when did", "where is", "how to"};
 
         // Check each category
         if (containsAny(userMessage, weatherKeywords)) {
